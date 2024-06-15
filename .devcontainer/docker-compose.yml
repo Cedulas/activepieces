@@ -4,6 +4,49 @@ networks:
   activepieces:
 
 services:
+  selenium-hub:
+    image: seleniarm/hub:latest
+    # image: selenium/hub:4.21.0
+    # platform: linux/amd64
+    container_name: selenium-hub
+
+    ports:
+      - 4444:4444
+
+  chrome:
+    image: seleniarm/node-chromium:latest
+    # image: selenium/node-chrome:4.21.0
+    # platform: linux/amd64
+    volumes:
+      - /dev/shm:/dev/shm
+      - ./files:/shared
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_NODE_MAX_SESSIONS=1
+      - SE_ENABLE_MANAGED_DOWNLOADS=true
+    command: >
+      bash -c 'SE_OPTS="--enable-managed-downloads true" /opt/bin/entry_point.sh'
+
+  firefox:
+    image: seleniarm/node-firefox:latest
+    # image: selenium/node-firefox:4.21.0
+    # platform: linux/amd64
+    volumes:
+      - /dev/shm:/dev/shm
+      - ./files:/shared
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_NODE_MAX_SESSIONS=1
+      - SE_ENABLE_MANAGED_DOWNLOADS=true
+    command: >
+      bash -c 'SE_OPTS="--enable-managed-downloads true" /opt/bin/entry_point.sh'
+
   app:
     privileged: true
     build:
@@ -19,7 +62,12 @@ services:
       - ..:/workspace:cached
 
     # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
-    network_mode: service:redis
+    # network_mode: service:redis
+
+    ports:
+      - 3000:3000
+      - 9229:9229
+      - 4200:4200
 
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
@@ -36,7 +84,7 @@ services:
       POSTGRES_DB: activepieces
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: A79Vm5D4p2VQHOp2gd5
-    network_mode: service:redis
+    # network_mode: service:redis
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -45,10 +93,11 @@ services:
     volumes:
       - redis_data:/data
 
-    ports:
-      - 3000:3000
-      - 9229:9229
-      - 4200:4200
+    # ports:
+    #   - 3000:3000
+    #   - 9229:9229
+    #   - 4200:4200
+    #   - 4444:4444
 
 volumes:
   postgres_data:

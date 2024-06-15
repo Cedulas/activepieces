@@ -663,6 +663,9 @@
       "@activepieces/ui/feature-templates": [
         "packages/ui/feature-templates/src/index.ts"
       ],
+      "@cedulas/piece-ui-vision": [
+        "packages/pieces/community/ui-vision/src/index.ts"
+      ],
       "@ee/*": ["packages/ee/*"],
       "ee-billing-ui": ["packages/ee/ui/billing/src/index.ts"],
       "ee-components": ["packages/ee/ui/components/src/index.ts"],
